@@ -5,6 +5,8 @@ var img
 var video
 var input
 var font
+var Gpio = require('onoff').Gpio;
+var pushButton = new Gpio(26, 'in', 'both');
 
 function preload() {
     // Ensure the .ttf or .otf font stored in the assets directory
@@ -114,12 +116,18 @@ function imprimir(){
     restart()
 }
 function keyPressed(){
-  if (state === 1) {
-    state = 2
-    redraw()
-  }
   if (keyCode === 13 && state === 3) {
     send()
     restart()
   }
 }
+pushButton.watch(function (err, value) { //Watch for hardware interrupts on pushButton GPIO, specify callback function
+                 if (err) { //if an error
+                 console.error('There was an error', err); //output error message to console
+                 return;
+                 }
+                 if (state === 1) {
+                 state = 2
+                 redraw()
+                 }
+                 });
