@@ -25,6 +25,17 @@ try {
 } finally {
 
 }
+function run(cmd,options ,callback) {
+    var spawn = require('child_process').spawn;
+    var command = spawn(cmd,options);
+    var result = '';
+    command.stdout.on('data', function(data) {
+                      result += data.toString();
+                      });
+    command.on('close', function(code) {
+               return callback(result);
+               });
+}
 app.use(express.static('public'));
 
 io.sockets.on('connection',
@@ -38,28 +49,12 @@ io.sockets.on('connection',
       }
     );
           socket.on('print', function() {
-                    const { spawn } = require('child_process');
-                    const child = spawn('python3', ['public/modify.py']);
-                    child.stdout.on('data', (data) => {
-                                    console.log(`child stdout:\n${data}`);
-                                    });
-                    
-                    child.stderr.on('data', (data) => {
-                                    console.error(`child stderr:\n${data}`);
-                                    });
+                    run("nfc-mfclassic",['r','A','u','dummy.mfd','clave.mfd','f'],function(result) {a=result.slice(-6,-1); if(a==='Done.'){a='imprime'};
+                        console.log(a)});
                     })
 
     socket.on('capture',function(){
-              const { spawn } = require('child_process');
-              const child = spawn('python3', ['public/modify.py']);
-              child.stdout.on('data', (data) => {
-                              console.log(`child stdout:\n${data}`);
-                              });
-              
-              child.stderr.on('data', (data) => {
-                              console.error(`child stderr:\n${data}`);
-                              });
-    })
+              run('python3', ['public/modify.py'],function(result) { console.log(result) });})
   }
 )
 
